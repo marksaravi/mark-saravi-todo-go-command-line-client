@@ -2,9 +2,11 @@ package main
 
 import (
 	"flag"
+	"log"
 	"os"
 
 	"gitgub.com/marksaravi/mark-saravi-todo-go-command-line-client/todos"
+	"github.com/lpernett/godotenv"
 )
 
 type todosReporter interface {
@@ -18,6 +20,11 @@ var commandsMappings = map[string]bool{
 }
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	arguments := os.Args[1:]
 	var command string
 	if len(arguments) == 0 {

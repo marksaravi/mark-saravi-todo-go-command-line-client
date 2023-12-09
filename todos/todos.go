@@ -2,6 +2,7 @@ package todos
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -60,6 +61,7 @@ func NewCustomTODOs(idsRange string) *todosHandler {
 }
 
 func (t *todosHandler) ToDosReport() {
+	fmt.Println(os.Getenv("BASE_URL"))
 	for i, id := range t.ids {
 		fmt.Printf("%2d: %d\n", i+1, id)
 	}
