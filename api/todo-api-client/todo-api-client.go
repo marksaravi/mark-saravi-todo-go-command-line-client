@@ -54,6 +54,7 @@ func (client *todoApiClient) GetTODO1(id int) <-chan ToDoResponse {
 		res, err := http.DefaultClient.Do(req)
 		if err != nil {
 			out <- ToDoResponse{
+				Id:             id,
 				HTTPStatusCode: res.StatusCode,
 				ErrorMessage:   err.Error(),
 			}
@@ -62,6 +63,7 @@ func (client *todoApiClient) GetTODO1(id int) <-chan ToDoResponse {
 		resBody, err := io.ReadAll(res.Body)
 		if err != nil {
 			out <- ToDoResponse{
+				Id:             id,
 				HTTPStatusCode: res.StatusCode,
 				ErrorMessage:   err.Error(),
 			}
@@ -71,11 +73,13 @@ func (client *todoApiClient) GetTODO1(id int) <-chan ToDoResponse {
 		err = json.Unmarshal(resBody, &todo)
 		if err != nil {
 			out <- ToDoResponse{
+				Id:             id,
 				HTTPStatusCode: res.StatusCode,
 				ErrorMessage:   err.Error(),
 			}
 		}
 		out <- ToDoResponse{
+			Id:             id,
 			HTTPStatusCode: res.StatusCode,
 			ErrorMessage:   "",
 			ToDo:           todo,
@@ -90,7 +94,23 @@ func (client *todoApiClient) GetTODO(id int) <-chan ToDoResponse {
 		defer close(out)
 
 		time.Sleep(time.Millisecond*50 + time.Millisecond*time.Duration(rand.Intn(50)))
+		if rand.Intn(7) == 3 {
+			out <- ToDoResponse{
+				Id:             id,
+				HTTPStatusCode: http.StatusInternalServerError,
+				ErrorMessage:   "Can't find the task",
+				ToDo: ToDo{
+					Id:        id,
+					UserId:    id,
+					Title:     fmt.Sprintf("Task #%d", id),
+					Completed: rand.Intn(100)%2 == 0,
+				},
+			}
+			return
+		}
+
 		out <- ToDoResponse{
+			Id:             id,
 			HTTPStatusCode: http.StatusOK,
 			ErrorMessage:   "",
 			ToDo: ToDo{
@@ -121,23 +141,23 @@ func (t ToDo) Print() {
 	yellow.Println(t.Title)
 	blue.Print("Completed")
 	fmt.Print(": ")
-	yellow.Println(completed)
+	yellow.Print(completed)
+	fmt.Println()
 }
 
 func (t ToDoResponse) Error() {
 	blue := color.New(color.FgBlue)
 	yellow := color.New(color.FgYellow)
 
+	red := color.New(color.FgRed)
+	red.Print("Error      ")
+	fmt.Print(": ")
+	red.Println(t.ErrorMessage)
 	blue.Print("ID         ")
 	fmt.Print(": ")
 	yellow.Println(t.Id)
 	blue.Print("HTTP Status")
 	fmt.Print(": ")
-	yellow.Println(t.HTTPStatusCode)
-	if t.ErrorMessage != "" {
-		red := color.New(color.FgRed)
-		red.Print("Error      ")
-		fmt.Print(": ")
-		red.Print("Error      ")
-	}
+	yellow.Print(t.HTTPStatusCode)
+	fmt.Println()
 }
