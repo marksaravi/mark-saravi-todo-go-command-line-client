@@ -2,7 +2,7 @@ package todos
 
 import (
 	"fmt"
-	"os"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -13,7 +13,8 @@ const MAX_NUMBER_OF_TODOS = 30
 const DEFAULT_NUMBER_OF_TODOS = 20
 
 type todosHandler struct {
-	ids []int
+	ids   []int
+	todos []api.ToDoResponse
 }
 
 func NewEvenTODOs(from, numberOfIds int) *todosHandler {
@@ -62,13 +63,35 @@ func NewCustomTODOs(idsRange string) *todosHandler {
 	}
 }
 
-func (t *todosHandler) ToDosReport() {
-	fmt.Println(os.Getenv("BASE_URL"))
+func (t *todosHandler) GetTodos() {
 	client := api.NewToDoApiClient()
-	for res := range client.MockGetTODO(t.ids[0]) {
-		fmt.Println(res.HTTPStatusCode)
-		fmt.Println(res.ErrorMessage)
-		res.ToDo.Print()
-		fmt.Print("__________________________________________________\n")
+	cases := make([]reflect.SelectCase, len(t.ids))
+	for i, id := range t.ids {
+		c := client.GetTODO(id)
+		cases[i] = reflect.SelectCase{
+			Dir:  reflect.SelectRecv,
+			Chan: reflect.ValueOf(c),
+		}
 	}
+	t.todos = make([]api.ToDoResponse, 0, len(cases))
+	for len(cases) > 0 {
+		i, v, ok := reflect.Select(cases)
+		if !ok {
+			cases = append(cases[:i], cases[i+1:]...)
+			continue
+		}
+		t.todos = append(t.todos, v.Interface().(api.ToDoResponse))
+	}
+}
+
+func (t *todosHandler) ToDosReport() {
+	for _, todo := range t.todos {
+		if todo.ErrorMessage == "" {
+			todo.ToDo.Print()
+		} else {
+			todo.Error()
+		}
+		fmt.Println("---------------------------------------")
+	}
+	fmt.Printf("Total: %d\n", len(t.todos))
 }

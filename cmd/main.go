@@ -10,6 +10,7 @@ import (
 )
 
 type todosReporter interface {
+	GetTodos()
 	ToDosReport()
 }
 
@@ -35,6 +36,7 @@ func main() {
 		command = "even"
 	}
 	reporter := TodoCommandFactory(command)
+	reporter.GetTodos()
 	reporter.ToDosReport()
 }
 

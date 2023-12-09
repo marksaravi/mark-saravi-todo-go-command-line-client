@@ -20,6 +20,7 @@ type ToDo struct {
 }
 
 type ToDoResponse struct {
+	Id             int
 	HTTPStatusCode int
 	ErrorMessage   string
 	ToDo           ToDo
@@ -42,7 +43,7 @@ func (client *todoApiClient) GetTODOs(ids ...int) []ToDoResponse {
 	return []ToDoResponse{}
 }
 
-func (client *todoApiClient) GetTODO(id int) <-chan ToDoResponse {
+func (client *todoApiClient) GetTODO1(id int) <-chan ToDoResponse {
 	out := make(chan ToDoResponse, 1)
 	go func(out chan ToDoResponse) {
 		defer close(out)
@@ -83,7 +84,7 @@ func (client *todoApiClient) GetTODO(id int) <-chan ToDoResponse {
 	return out
 }
 
-func (client *todoApiClient) MockGetTODO(id int) <-chan ToDoResponse {
+func (client *todoApiClient) GetTODO(id int) <-chan ToDoResponse {
 	out := make(chan ToDoResponse, 1)
 	go func(out chan ToDoResponse) {
 		defer close(out)
@@ -121,4 +122,22 @@ func (t ToDo) Print() {
 	blue.Print("Completed")
 	fmt.Print(": ")
 	yellow.Println(completed)
+}
+
+func (t ToDoResponse) Error() {
+	blue := color.New(color.FgBlue)
+	yellow := color.New(color.FgYellow)
+
+	blue.Print("ID         ")
+	fmt.Print(": ")
+	yellow.Println(t.Id)
+	blue.Print("HTTP Status")
+	fmt.Print(": ")
+	yellow.Println(t.HTTPStatusCode)
+	if t.ErrorMessage != "" {
+		red := color.New(color.FgRed)
+		red.Print("Error      ")
+		fmt.Print(": ")
+		red.Print("Error      ")
+	}
 }
