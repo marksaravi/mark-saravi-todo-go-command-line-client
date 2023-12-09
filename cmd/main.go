@@ -2,8 +2,10 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"gitgub.com/marksaravi/mark-saravi-todo-go-command-line-client/todos"
 	"github.com/lpernett/godotenv"
@@ -36,8 +38,11 @@ func main() {
 		command = "even"
 	}
 	reporter := TodoCommandFactory(command)
+	st := time.Now()
 	reporter.GetTodos()
+	dur := time.Since(st)
 	reporter.ToDosReport()
+	fmt.Printf("Dur(ms): %d\n", dur.Milliseconds())
 }
 
 func TodoCommandFactory(command string) todosReporter {

@@ -43,7 +43,7 @@ func (client *todoApiClient) GetTODOs(ids ...int) []ToDoResponse {
 	return []ToDoResponse{}
 }
 
-func (client *todoApiClient) GetTODO1(id int) <-chan ToDoResponse {
+func (client *todoApiClient) GetTODO(id int) <-chan ToDoResponse {
 	out := make(chan ToDoResponse, 1)
 	go func(out chan ToDoResponse) {
 		defer close(out)
@@ -88,7 +88,7 @@ func (client *todoApiClient) GetTODO1(id int) <-chan ToDoResponse {
 	return out
 }
 
-func (client *todoApiClient) GetTODO(id int) <-chan ToDoResponse {
+func (client *todoApiClient) GetTODOMock(id int) <-chan ToDoResponse {
 	out := make(chan ToDoResponse, 1)
 	go func(out chan ToDoResponse) {
 		defer close(out)
