@@ -5,6 +5,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	api "gitgub.com/marksaravi/mark-saravi-todo-go-command-line-client/api/todo-api-client"
 )
 
 const MAX_NUMBER_OF_TODOS = 30
@@ -62,7 +64,11 @@ func NewCustomTODOs(idsRange string) *todosHandler {
 
 func (t *todosHandler) ToDosReport() {
 	fmt.Println(os.Getenv("BASE_URL"))
-	for i, id := range t.ids {
-		fmt.Printf("%2d: %d\n", i+1, id)
+	client := api.NewToDoApiClient()
+	for res := range client.MockGetTODO(t.ids[0]) {
+		fmt.Println(res.HTTPStatusCode)
+		fmt.Println(res.ErrorMessage)
+		res.ToDo.Print()
+		fmt.Print("__________________________________________________\n")
 	}
 }
