@@ -14,9 +14,10 @@ type todosHandler struct {
 	ids          []int
 	todoChannels []<-chan api.ToDoResponse
 	todos        []api.ToDoResponse
+	usemock      bool
 }
 
-func NewEvenTODOs(from, numberOfIds int) *todosHandler {
+func NewEvenTODOs(from, numberOfIds int, usemock bool) *todosHandler {
 	ids := make([]int, 0, MAX_NUMBER_OF_TODOS)
 	if from%2 != 0 {
 		from++
@@ -25,11 +26,12 @@ func NewEvenTODOs(from, numberOfIds int) *todosHandler {
 		ids = append(ids, from+i*2)
 	}
 	return &todosHandler{
-		ids: ids,
+		ids:     ids,
+		usemock: usemock,
 	}
 }
 
-func NewOddTODOs(from, numberOfIds int) *todosHandler {
+func NewOddTODOs(from, numberOfIds int, usemock bool) *todosHandler {
 	ids := make([]int, 0, MAX_NUMBER_OF_TODOS)
 	if from%2 == 0 {
 		from++
@@ -38,7 +40,8 @@ func NewOddTODOs(from, numberOfIds int) *todosHandler {
 		ids = append(ids, from+i*2)
 	}
 	return &todosHandler{
-		ids: ids,
+		ids:     ids,
+		usemock: usemock,
 	}
 }
 
@@ -65,7 +68,12 @@ func (t *todosHandler) WaitTodos() {
 func (t *todosHandler) GetTodos() {
 	client := api.NewToDoApiClient()
 	for _, id := range t.ids {
-		c := client.GetTODOMock(id)
+		var c <-chan api.ToDoResponse
+		if t.usemock {
+			c = client.GetTODOMock(id)
+		} else {
+			c = client.GetTODO(id)
+		}
 		t.todoChannels = append(t.todoChannels, c)
 	}
 	t.WaitTodos()

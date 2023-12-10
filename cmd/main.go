@@ -40,10 +40,15 @@ func TodoCommandFactory() todosReporter {
 	methodPtr := flag.String("method", "even", "a string")
 	fromPtr := flag.String("from", "2", "a string")
 	nPtr := flag.String("n", "20", "a string")
+	usemockPtr := flag.String("usemock", "no", "a string")
 	flag.Parse()
 	method := "even"
 	from := 2
 	n := 20
+	usemock := false
+	if *usemockPtr == "yes" {
+		usemock = true
+	}
 	if v, err := strconv.Atoi(*fromPtr); err == nil {
 		from = v
 	}
@@ -56,10 +61,10 @@ func TodoCommandFactory() todosReporter {
 
 	switch method {
 	case "even":
-		return todos.NewEvenTODOs(from, n)
+		return todos.NewEvenTODOs(from, n, usemock)
 	case "odd":
-		return todos.NewOddTODOs(from, n)
+		return todos.NewOddTODOs(from, n, usemock)
 	default:
-		return todos.NewEvenTODOs(from, n)
+		return todos.NewEvenTODOs(from, n, usemock)
 	}
 }
