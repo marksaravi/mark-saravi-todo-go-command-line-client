@@ -11,8 +11,9 @@ const MAX_NUMBER_OF_TODOS = 30
 const DEFAULT_NUMBER_OF_TODOS = 20
 
 type todosHandler struct {
-	ids   []int
-	todos []api.ToDoResponse
+	ids          []int
+	todoChannels []<-chan api.ToDoResponse
+	todos        []api.ToDoResponse
 }
 
 func NewEvenTODOs(from, numberOfIds int) *todosHandler {
@@ -41,11 +42,10 @@ func NewOddTODOs(from, numberOfIds int) *todosHandler {
 	}
 }
 
-func (t *todosHandler) GetTodos() {
-	client := api.NewToDoApiClient()
+func (t *todosHandler) WaitTodos() {
 	cases := make([]reflect.SelectCase, len(t.ids))
-	for i, id := range t.ids {
-		c := client.GetTODO(id)
+	for i, c := range t.todoChannels {
+		t.todoChannels = append(t.todoChannels, c)
 		cases[i] = reflect.SelectCase{
 			Dir:  reflect.SelectRecv,
 			Chan: reflect.ValueOf(c),
@@ -60,6 +60,15 @@ func (t *todosHandler) GetTodos() {
 		}
 		t.todos = append(t.todos, v.Interface().(api.ToDoResponse))
 	}
+}
+
+func (t *todosHandler) GetTodos() {
+	client := api.NewToDoApiClient()
+	for _, id := range t.ids {
+		c := client.GetTODOMock(id)
+		t.todoChannels = append(t.todoChannels, c)
+	}
+	t.WaitTodos()
 }
 
 func (t *todosHandler) ToDosReport() {
