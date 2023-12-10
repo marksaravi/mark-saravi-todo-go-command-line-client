@@ -94,7 +94,7 @@ func (client *todoApiClient) GetTODOMock(id int) <-chan ToDoResponse {
 		defer close(out)
 
 		time.Sleep(time.Millisecond*50 + time.Millisecond*time.Duration(rand.Intn(50)))
-		if rand.Intn(7) == 3 {
+		if id%3 == 0 {
 			out <- ToDoResponse{
 				Id:             id,
 				HTTPStatusCode: http.StatusInternalServerError,

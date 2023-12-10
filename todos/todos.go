@@ -3,8 +3,6 @@ package todos
 import (
 	"fmt"
 	"reflect"
-	"strconv"
-	"strings"
 
 	api "gitgub.com/marksaravi/mark-saravi-todo-go-command-line-client/api/todo-api-client"
 )
@@ -37,26 +35,6 @@ func NewOddTODOs(from, numberOfIds int) *todosHandler {
 	}
 	for i := 0; i < numberOfIds; i++ {
 		ids = append(ids, from+i*2)
-	}
-	return &todosHandler{
-		ids: ids,
-	}
-}
-
-func NewCustomTODOs(idsRange string) *todosHandler {
-	idStrs := strings.Split(idsRange, ",")
-	ids := make([]int, 0, MAX_NUMBER_OF_TODOS)
-
-	for _, s := range idStrs {
-		id, err := strconv.Atoi(s)
-		if err == nil {
-			if id >= 1 && id <= 100 {
-				ids = append(ids, id)
-			}
-		}
-		if len(ids) == MAX_NUMBER_OF_TODOS {
-			break
-		}
 	}
 	return &todosHandler{
 		ids: ids,
