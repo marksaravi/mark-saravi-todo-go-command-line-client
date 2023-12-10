@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"os"
+	"strconv"
 	"time"
 
 	"gitgub.com/marksaravi/mark-saravi-todo-go-command-line-client/todos"
@@ -28,16 +28,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	arguments := os.Args[1:]
-	var command string
-	if len(arguments) == 0 {
-		command = "even"
-	} else if _, ok := commandsMappings[arguments[0]]; ok {
-		command = arguments[0]
-	} else {
-		command = "even"
-	}
-	reporter := TodoCommandFactory(command)
+	reporter := TodoCommandFactory()
 	st := time.Now()
 	reporter.GetTodos()
 	dur := time.Since(st)
@@ -45,21 +36,35 @@ func main() {
 	fmt.Printf("Dur(ms): %d\n", dur.Milliseconds())
 }
 
-func TodoCommandFactory(command string) todosReporter {
-	fromPtr := flag.Int("from", 2, "an int")
-	nPtr := flag.Int("n", todos.DEFAULT_NUMBER_OF_TODOS, "an int")
-	idsPtr := flag.String("range", "2,4,6,8,10", "a string")
-	from := *fromPtr
-	n := *nPtr
-	ids := *idsPtr
-	switch command {
+func TodoCommandFactory() todosReporter {
+	methodPtr := flag.String("method", "even", "a string")
+	fromPtr := flag.String("from", "2", "a string")
+	nPtr := flag.String("n", "20", "a string")
+	usemockPtr := flag.String("usemock", "no", "a string")
+	flag.Parse()
+	method := "even"
+	from := 2
+	n := 20
+	usemock := false
+	if *usemockPtr == "yes" {
+		usemock = true
+	}
+	if v, err := strconv.Atoi(*fromPtr); err == nil {
+		from = v
+	}
+	if v, err := strconv.Atoi(*nPtr); err == nil {
+		n = v
+	}
+	if *methodPtr == "odd" {
+		method = "odd"
+	}
+
+	switch method {
 	case "even":
-		return todos.NewEvenTODOs(from, n)
+		return todos.NewEvenTODOs(from, n, usemock)
 	case "odd":
-		return todos.NewOddTODOs(from, n)
-	case "custom":
-		return todos.NewCustomTODOs(ids)
+		return todos.NewOddTODOs(from, n, usemock)
 	default:
-		return todos.NewEvenTODOs(from, n)
+		return todos.NewEvenTODOs(from, n, usemock)
 	}
 }
